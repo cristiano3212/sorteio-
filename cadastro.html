@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Sorteio</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        input, button { margin: 5px; padding: 10px; font-size: 16px; }
+        #comprovante { display: none; border: 1px solid black; padding: 20px; width: 250px; margin: 20px auto; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <h2>Cadastro para Sorteio</h2>
+    <input type="text" id="nome" placeholder="Nome">
+    <input type="text" id="telefone" placeholder="Telefone">
+    <button onclick="cadastrar()">Cadastrar</button>
+
+    <div id="comprovante">
+        <h3>Comprovante</h3>
+        <p><strong>Nome:</strong> <span id="compNome"></span></p>
+        <p><strong>Telefone:</strong> <span id="compTelefone"></span></p>
+        <p><strong>Número da Sorte:</strong> <span id="compNumero"></span></p>
+        <button onclick="imprimirComprovante()">Imprimir</button>
+        <button onclick="compartilharComprovante()">Compartilhar</button>
+    </div>
+
+    <script>
+        function cadastrar() {
+            let nome = document.getElementById("nome").value.trim();
+            let telefone = document.getElementById("telefone").value.trim();
+            if (!nome || !telefone) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            let participantes = JSON.parse(localStorage.getItem("participantes")) || [];
+            let numeroSorte = Math.floor(100 + Math.random() * 900); // Número de 3 dígitos
+            participantes.push({ nome, telefone, numeroSorte });
+            localStorage.setItem("participantes", JSON.stringify(participantes));
+
+            // Exibir o comprovante
+            document.getElementById("compNome").innerText = nome;
+            document.getElementById("compTelefone").innerText = telefone;
+            document.getElementById("compNumero").innerText = numeroSorte;
+            document.getElementById("comprovante").style.display = "block";
+
+            // Limpar os campos
+            document.getElementById("nome").value = "";
+            document.getElementById("telefone").value = "";
+        }
+
+        function imprimirComprovante() {
+            let comprovante = document.getElementById("comprovante").innerHTML;
+            let janela = window.open("", "", "width=400,height=600");
+            janela.document.write("<html><head><title>Comprovante</title></head><body>");
+            janela.document.write(comprovante);
+            janela.document.write("</body></html>");
+            janela.document.close();
+            janela.print();
+        }
+
+        function compartilharComprovante() {
+            let nome = document.getElementById("compNome").innerText;
+            let telefone = document.getElementById("compTelefone").innerText;
+            let numero = document.getElementById("compNumero").innerText;
+            
+            let mensagem = `📜 Comprovante do Sorteio 📜
+
+Nome: ${nome}
+Telefone: ${telefone}
+Número da Sorte: ${numero}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: "Comprovante do Sorteio",
+                    text: mensagem
+                }).catch(err => console.log("Erro ao compartilhar:", err));
+            } else {
+                alert("Compartilhamento não suportado neste navegador. Copie o texto e compartilhe manualmente.");
+            }
+        }
+    </script>
+
+</body>
+</html>
